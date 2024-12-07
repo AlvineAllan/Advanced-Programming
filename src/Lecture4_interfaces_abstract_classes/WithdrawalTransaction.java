@@ -23,10 +23,9 @@ public class WithdrawalTransaction extends BaseTransaction {
      * Reverses the withdrawal transaction (adds the amount back to the account).
      * @return true if the reversal was successful
      */
-    public boolean reverse() {
-        // A simple reversal: Credit the withdrawal amount back to the account
-        // The reversal process might include additional checks (e.g., transaction history, permissions, etc.)
-        return true;  // Assuming reversal is always successful here (this can be extended)
+    public boolean reverse(BankAccount ba) {
+        ba.setBalance(ba.getBalance() + getAmount()); // Re-credit the amount
+        return true; // Assuming reversal is always successful
     }
 
     /**
@@ -38,15 +37,16 @@ public class WithdrawalTransaction extends BaseTransaction {
 
     /**
      * Applies the withdrawal to the bank account by decreasing the balance.
-     * The withdrawal is only successful if the account has sufficient funds.
+     * Throws InsufficientFundsException if the balance is insufficient.
+     * @param ba the BankAccount to apply the transaction to
+     * @throws InsufficientFundsException if the account balance is insufficient
      */
-    public void apply(BankAccount ba) {
+    @Override
+    public void apply(BankAccount ba) throws InsufficientFundsException {
         double curr_balance = ba.getBalance();
-        if (curr_balance >= getAmount()) {
-            double new_balance = curr_balance - getAmount();
-            ba.setBalance(new_balance);
-        } else {
-            System.out.println("Insufficient funds for withdrawal!");
+        if (curr_balance < getAmount()) {
+            throw new InsufficientFundsException("Insufficient funds for withdrawal of " + getAmount());
         }
+        ba.setBalance(curr_balance - getAmount());
     }
 }
